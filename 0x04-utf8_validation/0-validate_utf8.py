@@ -1,46 +1,44 @@
 #!/usr/bin/python3
+"""Module for validUTF8 method"""
+
 
 def validUTF8(data):
-    # Function to count the number of leading ones in a byte
-    def countLeadingOnes(byte):
-        count = 0
+    """Determines if given data represents a valid UTF-8 encoding
+    Args:
+        data: list of integers representing a data set
+    Returns:
+        True if the data is a valid UTF-8 encoding, otherwise False
+    """
+    # Number of bytes in the current UTF-8 character
+    n_bytes = 0
+
+    # Mask to check if the most significant bit is set or not
+    mask1 = 1 << 7
+
+    # Mask to check if the second most significant bit is set or not
+    mask2 = 1 << 6
+    
+    for num in data:
+        # Get the number of set most significant bits in the byte if
+        # this is the starting byte of an UTF-8 character.
         mask = 1 << 7
-        while byte & mask:
-            count += 1
-            mask >>= 1
-        return count
+        if n_bytes == 0:
+            while mask & num:
+                n_bytes += 1
+                mask = mask >> 1
 
-    # Check if the data represents a valid UTF-8 encoding
-    i = 0
-    while i < len(data):
-        leading_ones = countLeadingOnes(data[i])
-        
-        # 1-byte character (0xxxxxxx)
-        if leading_ones == 0:
-            i += 1
-        # Invalid character or incomplete encoding
-        elif leading_ones == 1 or leading_ones > 4:
-            return False
-        # Multi-byte character (11xxxxxx, 110xxxxx, 1110xxxx, or 11110xxx)
-        else:
-            # Check if there are enough bytes following the leading byte
-            if i + leading_ones > len(data) - 1:
+            # 1 byte characters
+            if n_bytes == 0:
+                continue
+
+            # Invalid scenarios according to the rules of the problem.
+            if n_bytes == 1 or n_bytes > 4:
                 return False
-            # Check if the following bytes are of the form 10xxxxxx
-            for j in range(1, leading_ones):
-                if not (data[i + j] & 0b11000000 == 0b10000000):
-                    return False
-            i += leading_ones
-
-    return True
-
-# Test cases
-if __name__ == "__main__":
-    data = [65]
-    print(validUTF8(data))  # Output: True
-
-    data = [80, 121, 116, 104, 111, 110, 32, 105, 115, 32, 99, 111, 111, 108, 33]
-    print(validUTF8(data))  # Output: True
-
-    data = [229, 65, 127, 256]
-    print(validUTF8(data))  # Output: False
+        else:
+            # If this byte is a part of an existing UTF-8 character, then we
+            # simply have to look at the two most significant bits and we make
+            # use of the masks we defined before.
+            if not (num & mask1 and not (num & mask2)):
+                return False
+        n_bytes -= 1
+    return n_bytes == 0
