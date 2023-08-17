@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-"""A function to rotate a matrix by 90 degrees clockwise"""
+"""A module that rotates a matrix by 90 degrees"""
 
 
-def rotate_matrix_90_degrees(matrix):
-    """Returns a matrix rotated by 90 degrees clockwise"""
+def rotate_2d_matrix(matrix):
+    """returns a 90 degrees rotated matrix"""
 
     copy_matrix = matrix.copy()
     matrix.clear()
